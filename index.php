@@ -175,8 +175,13 @@ if ($accion === 'login') {
 } elseif ($accion === 'feedback') {
     verificarSesion();
     $controller = new \App\Controlador\FeedbackControlador();
+    
     if (isset($parts[1]) && $parts[1] === 'crear') {
         $controller->crear();
+
+    } elseif (isset($parts[1]) && $parts[1] === 'procesar') {
+        $controller->procesar();
+
     } else {
         $controller->index();
     }
