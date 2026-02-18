@@ -35,11 +35,11 @@
         </form>
 
         <p class="mt-4 text-center text-gray-600">
-            ¿No tienes cuenta? <a href="<?= BASE_URL ?>registro" class="text-blue-600 hover:underline">Regístrate</a>
+            ¿No tienes cuenta? <a href="<?= BASE_URL ?>registro" class="text-blue-600 font-bold hover:underline">Regístrate</a>
         </p>
 
         <p class="mt-4 text-center text-gray-600">
-            <a href="<?= BASE_URL ?>" class="text-blue-600 hover:underline">Volver</a>
+            <a href="<?= BASE_URL ?>" class="text-blue-600 font-bold hover:underline">Volver</a>
         </p>
     </div>
 </body>

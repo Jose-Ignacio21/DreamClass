@@ -15,8 +15,6 @@ class TareaControlador {
         $rol = $_SESSION['usuario_rol'];
         $estado = $_GET['estado'] ?? 'todas';
 
-        // Si eres docente, buscamos las tareas que ha mandado 
-        // mientras que si eres alumno, buscamos las tareas que te han mandado
         if ($rol === 'docente') {
             $sql = "
                 SELECT t.*, u.nombre AS alumno_nombre, a.ruta_archivo
@@ -37,7 +35,6 @@ class TareaControlador {
             $params = [$usuario_id];
         }
         
-        // Para el sistema de filtros
         if ($estado === 'pendientes') {
             $sql .= " AND t.completada = 0";
         } elseif ($estado === 'completadas') {
@@ -55,7 +52,8 @@ class TareaControlador {
             'rol' => $rol,
             'tareas' => $tareas,
             'estado' => $estado,
-            'error' => $_GET['error'] ?? null
+            'error' => $_GET['error'] ?? null,
+            'success' => $_GET['success'] ?? null
         ];
 
         require_once __DIR__ . '/../View/tareas/index.php';
@@ -70,7 +68,6 @@ class TareaControlador {
             exit;
         }
 
-        // Solo cargamos los alumnos que el docente da clases para que no envie a otros alumnos
         $docente_id = $_SESSION['usuario_id'];
         $stmt = $pdo->prepare("
             SELECT DISTINCT u.id_usuario, u.nombre, u.apellidos
@@ -117,12 +114,13 @@ class TareaControlador {
             $id_alumno = $_POST['id_alumno'] ?? '';
             $titulo = $_POST['titulo'] ?? '';
             $descripcion = $_POST['descripcion'] ?? '';
-
+            
             if (empty($id_alumno) || empty($titulo)) {
                 header('Location: ' . BASE_URL . 'tareas/crear?error=Faltan datos obligatorios');
                 exit;
             }
 
+            // Es para ver si es mi alumno
             $stmtVerificar = $pdo->prepare("
                 SELECT COUNT(*) FROM inscripcion i
                 JOIN grupo g ON i.id_grupo = g.id_grupo
@@ -135,10 +133,12 @@ class TareaControlador {
                  exit;
             }
 
-            // Aqui insertamos en la base de datos la tarea con los respectivos atributos
-            $stmt = $pdo->prepare("INSERT INTO tarea (id_docente, id_alumno, titulo, descripcion) VALUES (?, ?, ?, ?)");
+            // Insertamos en la base de datos 
+            $stmt = $pdo->prepare("INSERT INTO tarea (id_docente, id_alumno, titulo, descripcion, fecha_asignacion, completada) VALUES (?, ?, ?, ?, NOW(), 0)");
+            
             try {
                 $stmt->execute([$_SESSION['usuario_id'], $id_alumno, $titulo, $descripcion]);
+
                 header('Location: ' . BASE_URL . 'tareas?success=Tarea asignada correctamente');
                 exit;
             } catch (\Exception $e) {
@@ -153,7 +153,6 @@ class TareaControlador {
                 exit;
             }
 
-            // Actualizamos la base de datos finalizando la tarea y se marca como completada
             $id_tarea = $_POST['id_tarea'] ?? '';
             $stmt = $pdo->prepare("UPDATE tarea SET completada = 1, fecha_completada = NOW() WHERE id_tarea = ? AND id_alumno = ?");
             try {
