@@ -71,7 +71,7 @@
             ¿Ya tienes cuenta? <a href="<?= BASE_URL ?>login" class="text-blue-600 font-bold hover:underline">Inicia sesión</a>
         </p>
         <p class="mt-4 text-center text-gray-600">
-            <a href="<?= BASE_URL ?>" class="text-blue-600 hover:underline">Volver</a>
+            <a href="<?= BASE_URL ?>" class="text-blue-600 font-bold hover:underline">Volver</a>
         </p>
     </div>
 

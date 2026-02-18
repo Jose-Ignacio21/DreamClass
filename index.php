@@ -166,8 +166,13 @@ if ($accion === 'login') {
 } elseif ($accion === 'tareas') {
     verificarSesion();
     $controller = new \App\Controlador\TareaControlador();
+    
     if (isset($parts[1]) && $parts[1] === 'crear') {
         $controller->crear();
+
+    } elseif (isset($parts[1]) && $parts[1] === 'procesar') {
+        $controller->procesar();
+
     } else {
         $controller->index();
     }
