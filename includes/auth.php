@@ -1,20 +1,26 @@
 <?php
-session_start();
 
-if (!isset($_SESSION["usuario_id"])) {
-    header('Location: ../login.php?error=Necesitas iniciar sesión');
-    exit;
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
 }
 
-// Si esta página es de docente, verificar rol
-if (basename(dirname(__FILE__)) === "docente" && $_SESSION["usuario_rol"] !== "docente") {
-    header('Location: ../login.php?error=Acceso denegado: no eres docente');
-    exit;
+if (!defined('BASE_URL')) {
+    define('BASE_URL', '/'); 
 }
 
-// Si esta página es de alumno, verificar rol
-if (basename(dirname(__FILE__)) === "alumno" && $_SESSION["usuario_rol"] !== "alumno") {
-    header('Location: ../login.php?error=Acceso denegado: no eres alumno');
-    exit;
+function verificarAutenticacion() {
+    if (!isset($_SESSION["usuario_id"])) {
+        header('Location: ' . BASE_URL . 'login?error=Necesitas iniciar sesión');
+        exit;
+    }
+}
+
+function verificarRol($rol_requerido) {
+    verificarAutenticacion();
+    
+    if ($_SESSION["usuario_rol"] !== $rol_requerido) {
+        header('Location: ' . BASE_URL . 'login?error=Acceso denegado: no tienes permisos');
+        exit;
+    }
 }
 ?>
