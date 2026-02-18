@@ -1,4 +1,5 @@
 <?php
+// PROYECTO DREAMCLASS - Gestion de clases
 // index.php es utilizado como controlador
 // Todas las peticiones van a pasar por él para llevarlas a su controlador necesario
 
