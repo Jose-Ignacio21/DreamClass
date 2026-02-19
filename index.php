@@ -1,4 +1,5 @@
 <?php
+// PROYECTO DREAMCLASS - Gestion de clases
 // index.php es utilizado como controlador
 // Todas las peticiones van a pasar por él para llevarlas a su controlador necesario
 
@@ -180,8 +181,13 @@ if ($accion === 'login') {
 } elseif ($accion === 'feedback') {
     verificarSesion();
     $controller = new \App\Controlador\FeedbackControlador();
+    
     if (isset($parts[1]) && $parts[1] === 'crear') {
         $controller->crear();
+
+    } elseif (isset($parts[1]) && $parts[1] === 'procesar') {
+        $controller->procesar();
+
     } else {
         $controller->index();
     }
