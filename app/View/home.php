@@ -42,7 +42,7 @@
                             <span class="block text-blue-600 xl:inline">tus clases particulares</span>
                         </h1>
                         <p class="mt-3 text-base text-gray-500 sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl lg:mx-0">
-                            Conecta alumnos y docentes en un entorno digital diseñado para el aprendizaje. Horarios, tareas, chat y feedback en un solo lugar.
+                            Conecta alumnos y docentes en un entorno digital diseñado para el aprendizaje. Clases, tareas, chat y feedback en un solo lugar.
                         </p>
                         <div class="mt-5 sm:mt-8 sm:flex sm:justify-center lg:justify-start">
                             <div class="rounded-md shadow">
