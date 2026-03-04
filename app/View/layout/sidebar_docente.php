@@ -10,7 +10,7 @@ function getActiveClass($uri, $keyword) {
                        strpos($uri, 'feedback') === false && 
                        strpos($uri, 'validacion') === false &&
                        strpos($uri, 'recursos') === false &&
-                       strpos($uri, 'horario') === false;
+                       strpos($uri, 'historial') === false;
         return $isDashboard ? 'bg-blue-600 text-white shadow-md' : 'text-gray-400 hover:bg-slate-800 hover:text-white';
     }
 
@@ -20,13 +20,11 @@ function getActiveClass($uri, $keyword) {
 }
 ?>
 
-<aside class="w-64 bg-slate-900 text-white min-h-screen p-4 sticky top-0 flex flex-col transition-all duration-300">
-    <div class="text-center mb-8 pt-4">
-        <a href="<?= BASE_URL ?>docente" class="block hover:opacity-80 transition transform hover:scale-105 duration-200">
-            <img src="<?= BASE_URL ?>assets/img/logoDreamClass.png"
-                alt="DreamClass Logo"
-                class="h-16 w-auto mx-auto mb-3"> 
-        </a>
+<aside class="w-64 bg-slate-900 text-white min-h-screen p-4 sticky top-0 flex flex-col transition-all duration-300 z-20 shadow-lg">
+    
+    <div class="mb-8 pt-4 text-center">
+            <h2 class="text-3xl font-bold text-blue-500 tracking-tight">Dream<span class="text-white">Class</span></h2>
+            <p class="text-xs text-blue-300 mt-1 uppercase tracking-wider font-semibold">Portal Docente</p>
     </div>
 
     <nav class="space-y-2 flex-1">

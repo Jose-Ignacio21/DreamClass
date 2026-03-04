@@ -131,54 +131,68 @@ class DocenteControlador {
         require_once __DIR__ . '/../View/docente/validacion.php';
     }
     public function procesarValidacion() {
-        if (session_status() === PHP_SESSION_NONE){
-            session_start();
-        } 
-        $id_docente = $_SESSION['usuario_id'];
+        require_once __DIR__ . '/../../includes/auth.php';
+        require_once __DIR__ . '/../../includes/db.php';
+        require_once __DIR__ . '/../../includes/email.php';
 
-        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['titulo'])) {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !isset($_SESSION['usuario_id']) || $_SESSION['usuario_rol'] !== 'admin') {
+            header('Location: ' . BASE_URL . 'admin');
+            exit;
+        }
+
+        $id_docente = $_POST['id_docente'] ?? '';
+        $accion = $_POST['accion'] ?? '';
+
+        if (empty($id_docente) || !in_array($accion, ['verificado', 'rechazado'])) {
+            header('Location: ' . BASE_URL . 'admin/validacion?error=Datos inválidos.');
+            exit;
+        }
+
+        try {
             
-            $archivo = $_FILES['titulo'];
-            $nombreOriginal = $archivo['name'];
-            $tipo = $archivo['type'];
-            $tmpName = $archivo['tmp_name'];
-            $error = $archivo['error'];
-            $tamano = $archivo['size'];
+            $stmtDocente = $pdo->prepare("SELECT nombre, email FROM usuario WHERE id_usuario = ?");
+            $stmtDocente->execute([$id_docente]);
+            $docente = $stmtDocente->fetch();
 
-            $ext = strtolower(pathinfo($nombreOriginal, PATHINFO_EXTENSION));
-            $permitidos = ['pdf', 'jpg', 'jpeg', 'png'];
-
-            if (!in_array($ext, $permitidos)) {
-                header('Location: ' . BASE_URL . 'docente/validacion?error=Formato no permitido. Usa PDF o Imagen.');
-                exit;
-            }
-
-            if ($tamano > 5 * 1024 * 1024) { 
-                header('Location: ' . BASE_URL . 'docente/validacion?error=El archivo es demasiado grande (Máx 5MB).');
-                exit;
-            }
-
-            $carpetaDestino = __DIR__ . '/../../public/uploads/titulos/';
-            if (!file_exists($carpetaDestino)) {
-                mkdir($carpetaDestino, 0777, true);
-            }
-
-            // Generar nombre único para no sobrescribir
-            $nombreFinal = 'titulo_' . $id_docente . '_' . time() . '.' . $ext;
-            $rutaDestino = $carpetaDestino . $nombreFinal;
-
-            // Coger el archivo de la carpeta temporal y llevarlo a la carpeta creada
-            if (move_uploaded_file($tmpName, $rutaDestino)) {
-                require_once __DIR__ . '/../../includes/db.php';
-                require_once __DIR__ . '/../Modelo/Docente.php';
+            $stmt = $pdo->prepare("UPDATE docente SET estado_validacion = ? WHERE id_docente = ?");
+            $stmt->execute([$accion, $id_docente]);
+            
+            if ($docente) {
+                $nombre = $docente['nombre'];
+                $email = $docente['email'];
                 
-                $modelo = new \App\Modelo\Docente($pdo);
-                $modelo->subirTitulo($id_docente, $nombreFinal);
+                if ($accion === 'verificado') {
+                    $asunto = "¡Cuenta Verificada! - DreamClass";
+                    $mensajeHTML = "
+                        <div style='font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px;'>
+                            <h2 style='color: #2563eb; text-align: center;'>¡Enhorabuena, $nombre!</h2>
+                            <p style='color: #555; font-size: 16px; text-align: center;'>Tu título ha sido revisado y <strong>aprobado</strong> por nuestro equipo de administración.</p>
+                            <div style='background-color: #eff6ff; padding: 15px; text-align: center; border-radius: 8px; margin: 20px 0;'>
+                                <p style='color: #1e3a8a; font-size: 16px; margin: 0;'>Ya tienes tu insignia de <strong>Docente Verificado</strong> en tu perfil.</p>
+                            </div>
+                            <div style='text-align: center;'>
+                                <a href='" . BASE_URL . "login' style='background-color: #2563eb; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-weight: bold;'>Entrar a DreamClass</a>
+                            </div>
+                        </div>";
+                } else {
+                    $asunto = "Actualización sobre tu verificación - DreamClass";
+                    $mensajeHTML = "
+                        <div style='font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px;'>
+                            <h2 style='color: #dc2626; text-align: center;'>Hola, $nombre</h2>
+                            <p style='color: #555; font-size: 16px; text-align: center;'>Lamentamos informarte que tu documento ha sido <strong>rechazado</strong>. Asegúrate de que la imagen sea legible y corresponda a un título válido.</p>
+                            <p style='color: #555; font-size: 16px; text-align: center;'>Puedes volver a subir un documento nuevo desde la sección de 'Mi Perfil' o contactar con soporte.</p>
+                        </div>";
+                }
 
-                header('Location: ' . BASE_URL . 'docente?mensaje=Documento subido correctamente. En revisión.');
-            } else {
-                header('Location: ' . BASE_URL . 'docente/validacion?error=Error al subir el archivo al servidor.');
+                enviarEmailBrevo($email, $nombre, $asunto, $mensajeHTML);
             }
+
+            $mensaje = ($accion === 'verificado') ? 'Docente aprobado y notificado.' : 'Docente rechazado y notificado.';
+            header('Location: ' . BASE_URL . 'admin/validacion?success=' . urlencode($mensaje));
+            exit;
+        } catch (\Exception $e) {
+            header('Location: ' . BASE_URL . 'admin/validacion?error=Error al actualizar el estado.');
+            exit;
         }
     }
 }

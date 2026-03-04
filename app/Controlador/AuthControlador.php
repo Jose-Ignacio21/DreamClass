@@ -25,7 +25,12 @@ class AuthControlador {
         }
 
         // SQL para buscar usuario
-        $stmt = $pdo->prepare("SELECT id_usuario, nombre, apellidos, email, contrasenia, rol, foto_perfil FROM usuario WHERE email = ?");
+        $stmt = $pdo->prepare("
+            SELECT u.id_usuario, u.nombre, u.apellidos, u.email, u.contrasenia, u.rol, u.foto_perfil, d.estado_validacion 
+            FROM usuario u 
+            LEFT JOIN docente d ON u.id_usuario = d.id_docente 
+            WHERE u.email = ?"
+            );
         $stmt->execute([$email]);
         $usuario = $stmt->fetch();
 
@@ -42,9 +47,12 @@ class AuthControlador {
         $_SESSION["usuario_apellidos"] = $usuario["apellidos"]; 
         $_SESSION["usuario_foto"] = $usuario["foto_perfil"];    
         $_SESSION["usuario_rol"] = $usuario["rol"];
+        $_SESSION["estado_validacion"] = $usuario["estado_validacion"] ?? null;
 
         // Redirigir según rol
-        if ($usuario['rol'] === 'docente') {
+        if ($usuario['rol'] === 'admin') {
+            header('Location: ' . BASE_URL . 'admin');
+        } elseif ($usuario['rol'] === 'docente') {
             header('Location: ' . BASE_URL . 'docente');
         } else {
             header('Location: ' . BASE_URL . 'alumno');
@@ -172,6 +180,82 @@ class AuthControlador {
             header('Location: ' . BASE_URL . 'registro?error=Error al registrar. Inténtalo más tarde.&nombre=' . urlencode($nombre) . '&email=' . urlencode($email) . '&rol=' . urlencode($rol));
             exit;
         }
+    }
+
+    public function recuperarPassword() {
+        require_once __DIR__ . '/../../recuperar.php'; 
+    }
+
+    // El proceso del email y de la contraseña se hace en esta funcion
+    public function procesarRecuperacion() {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: ' . BASE_URL . 'recuperar');
+            exit;
+        }
+
+        require_once __DIR__ . '/../../includes/db.php';
+        require_once __DIR__ . '/../../includes/email.php';
+
+        $email = trim($_POST['email'] ?? '');
+
+        if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            header('Location: ' . BASE_URL . 'recuperar?error=Por favor, introduce un email válido.');
+            exit;
+        }
+
+        $stmt = $pdo->prepare("SELECT id_usuario, nombre FROM usuario WHERE email = ?");
+        $stmt->execute([$email]);
+        $usuario = $stmt->fetch();
+
+        if ($usuario) {
+            $caracteres = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            $nueva_password = substr(str_shuffle($caracteres), 0, 8);
+
+            $hashedPassword = password_hash($nueva_password, PASSWORD_DEFAULT);
+
+            $stmtUpdate = $pdo->prepare("UPDATE usuario SET contrasenia = ? WHERE id_usuario = ?");
+            $stmtUpdate->execute([$hashedPassword, $usuario['id_usuario']]);
+
+            $nombre = $usuario['nombre'];
+            $asunto = "Recuperación de contraseña - DreamClass";
+            $mensajeHTML = "
+            <div style='font-family: Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 30px; border: 1px solid #e5e7eb; border-radius: 12px; background-color: #ffffff;'>
+                <h2 style='color: #2563eb; text-align: center; font-size: 24px;'>Recuperación de Acceso</h2>
+                <p style='color: #4b5563; font-size: 16px; line-height: 1.6;'>Hola, <strong>$nombre</strong>.</p>
+                <p style='color: #4b5563; font-size: 16px; line-height: 1.6;'>Hemos recibido una solicitud para restablecer tu contraseña. Hemos generado una contraseña temporal segura para ti:</p>
+                
+                <div style='background-color: #f3f4f6; padding: 20px; text-align: center; font-size: 24px; font-weight: bold; letter-spacing: 3px; border-radius: 8px; margin: 25px 0; color: #1f2937;'>
+                    $nueva_password
+                </div>
+
+                <h3 style='color: #374151;'>Tus próximos pasos:</h3>
+                <ol style='color: #4b5563; font-size: 15px; line-height: 1.8;'>
+                    <li>Copia la contraseña temporal que aparece arriba.</li>
+                    <li>Inicia sesión en DreamClass usando esta contraseña.</li>
+                    <li>Una vez dentro, dirígete al menú de <strong>Mi Perfil</strong> (arriba a la derecha).</li>
+                    <li>Cambia esta contraseña por una que puedas recordar fácilmente.</li>
+                </ol>
+
+                <div style='text-align: center; margin: 35px 0;'>
+                    <a href='" . BASE_URL . "login' style='background-color: #2563eb; color: #ffffff; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px; display: inline-block;'>
+                        Ir a Iniciar Sesión
+                    </a>
+                </div>
+                
+                <hr style='border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;'>
+                <p style='color: #9ca3af; font-size: 12px; text-align: center;'>Si no solicitaste este cambio, contacta con nosotros de inmediato.</p>
+            </div>
+            ";
+
+            try {
+                enviarEmailBrevo($email, $nombre, $asunto, $mensajeHTML);
+            } catch (\Exception $e) {
+                error_log("Error al enviar email de recuperación: " . $e->getMessage());
+            }
+        }
+
+        header('Location: ' . BASE_URL . 'login?success=Si tu email está registrado, recibirás las instrucciones en breve.');
+        exit;
     }
 }
 ?>

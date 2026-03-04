@@ -83,6 +83,14 @@ if ($accion === 'login') {
     $controller = new \App\Controlador\AuthControlador();
     $controller->procesarRegistro();
 
+} elseif ($accion === 'recuperar') {
+    $controller = new \App\Controlador\AuthControlador();
+    $controller->recuperarPassword();
+
+} elseif ($accion === 'procesar_recuperacion') {
+    $controller = new \App\Controlador\AuthControlador();
+    $controller->procesarRecuperacion();
+
 } elseif ($accion === 'privacidad') {
 
     require_once __DIR__ . '/app/Controlador/PaginasControlador.php';
@@ -219,6 +227,26 @@ if ($accion === 'login') {
     $controller = new \App\Controlador\AlumnoControlador();
     $controller->dashboard();
 
+}elseif ($accion === 'admin') {
+    verificarSesion();
+    $controller = new \App\Controlador\AdminControlador();
+    $subaccion = $parts[1] ?? '';
+    
+    if ($subaccion === 'usuarios') {
+        $controller->gestionarUsuarios();
+    } elseif ($subaccion === 'editar_usuario') {
+        $controller->editarUsuario();
+    } elseif ($subaccion === 'procesar_edicion') {
+        $controller->procesarEdicionUsuario();
+    } elseif ($subaccion === 'eliminar_usuario') {
+        $controller->eliminarUsuario();
+    } elseif ($subaccion === 'validacion') {
+        $controller->validacion();
+    } elseif ($subaccion === 'procesar_validacion') {
+        $controller->procesarValidacion();
+    } else {
+        $controller->dashboard();
+    }
 } elseif ($accion === 'perfil') {
     verificarSesion(); 
     
