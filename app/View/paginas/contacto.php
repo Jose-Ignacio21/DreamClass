@@ -63,7 +63,7 @@
                         </div>
                         <div>
                             <h3 class="font-bold text-gray-900 text-lg">Llámanos</h3>
-                            <p class="text-gray-500 mt-1">Lunes a Viernes, de 09:00 a 18:00 (CET).</p>
+                            <p class="text-gray-500 mt-1">Lunes a Viernes, a todas horas.</p>
                             <p class="text-blue-600 font-medium mt-1 block">+34 643 66 96 29</p>
                         </div>
                     </div>

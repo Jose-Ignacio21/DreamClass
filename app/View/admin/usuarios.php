@@ -68,7 +68,7 @@
                                     <a href="<?= BASE_URL ?>admin/editar_usuario?id=<?= $usuario['id_usuario'] ?>" class="text-indigo-600 hover:text-indigo-900 mr-3 font-medium transition">Editar</a>
                                     <a href="<?= BASE_URL ?>admin/eliminar_usuario?id=<?= $usuario['id_usuario'] ?>" onclick="return confirm('¿Estas seguro?\n\nAl borrar a este usuario desaparecerán también sus clases, mensajes y tareas para siempre.');" class="text-red-600 hover:text-red-900 font-medium transition">Eliminar</a>
                                 <?php else: ?>
-                                    <span class="text-gray-400 text-xs italic">Intocable</span>
+                                    <span class="text-gray-400 text-xs italic">Prohibido</span>
                                 <?php endif; ?>
                             </td>
                         </tr>

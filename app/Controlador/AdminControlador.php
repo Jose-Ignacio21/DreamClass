@@ -94,6 +94,7 @@ class AdminControlador {
     public function procesarValidacion() {
         require_once __DIR__ . '/../../includes/auth.php';
         require_once __DIR__ . '/../../includes/db.php';
+        require_once __DIR__ . '/../../includes/email.php';
 
         if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !isset($_SESSION['usuario_id']) || $_SESSION['usuario_rol'] !== 'admin') {
             header('Location: ' . BASE_URL . 'admin');
@@ -109,10 +110,48 @@ class AdminControlador {
         }
 
         try {
+            $stmtDocente = $pdo->prepare("SELECT nombre, email FROM usuario WHERE id_usuario = ?");
+            $stmtDocente->execute([$id_docente]);
+            $docente = $stmtDocente->fetch();
+
             $stmt = $pdo->prepare("UPDATE docente SET estado_validacion = ? WHERE id_docente = ?");
             $stmt->execute([$accion, $id_docente]);
             
-            $mensaje = ($accion === 'verificado') ? 'Docente aprobado correctamente.' : 'Docente rechazado.';
+            if ($docente) {
+                $nombre = $docente['nombre'];
+                $email = $docente['email'];
+                
+                if ($accion === 'verificado') {
+                    $asunto = "¡Cuenta Verificada! - DreamClass";
+                    $mensajeHTML = "
+                        <div style='font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px;'>
+                            <h2 style='color: #2563eb; text-align: center;'>¡Enhorabuena, $nombre!</h2>
+                            <p style='color: #555; font-size: 16px; text-align: center;'>Tu título ha sido revisado y <strong>aprobado</strong> por nuestro equipo de administración.</p>
+                            <div style='background-color: #eff6ff; padding: 15px; text-align: center; border-radius: 8px; margin: 20px 0;'>
+                                <p style='color: #1e3a8a; font-size: 16px; margin: 0;'>Ya tienes tu insignia de <strong>Docente Verificado</strong> en tu perfil.</p>
+                            </div>
+                            <div style='text-align: center;'>
+                                <a href='" . BASE_URL . "login' style='background-color: #2563eb; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-weight: bold;'>Entrar a DreamClass</a>
+                            </div>
+                        </div>";
+                } else {
+                    $asunto = "Actualización sobre tu verificación - DreamClass";
+                    $mensajeHTML = "
+                        <div style='font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px;'>
+                            <h2 style='color: #dc2626; text-align: center;'>Hola, $nombre</h2>
+                            <p style='color: #555; font-size: 16px; text-align: center;'>Lamentamos informarte que tu documento ha sido <strong>rechazado</strong>. Asegúrate de que la imagen sea legible y corresponda a un título válido.</p>
+                            <p style='color: #555; font-size: 16px; text-align: center;'>Puedes volver a subir un documento nuevo desde la sección de 'Mi Perfil' o contactar con soporte.</p>
+                        </div>";
+                }
+
+                try {
+                    enviarEmailBrevo($email, $nombre, $asunto, $mensajeHTML);
+                } catch (\Exception $e) {
+                    error_log("Error al enviar el email de validación: " . $e->getMessage());
+                }
+            }
+            
+            $mensaje = ($accion === 'verificado') ? 'Docente aprobado correctamente y notificado.' : 'Docente rechazado y notificado.';
             header('Location: ' . BASE_URL . 'admin/validacion?success=' . urlencode($mensaje));
             exit;
         } catch (\Exception $e) {

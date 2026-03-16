@@ -98,7 +98,7 @@
                     <div class="flex items-center mb-4">
                         <div class="text-yellow-400 flex">★★★★★</div>
                     </div>
-                    <p class="text-gray-600 italic mb-4">"DreamClass ha transformado la manera en que organizo mis clases de matemáticas. El chat integrado es súper útil para dudas rápidas."</p>
+                    <p class="text-gray-600 italic mb-4">"DreamClass ha transformado la manera en que organizo mis clases. El chat es súper cómodo para dudas rápidas."</p>
                     <div class="flex items-center">
                         <div class="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold">L</div>
                         <div class="ml-3">
@@ -110,7 +110,7 @@
 
                 <div class="bg-white p-6 rounded-lg shadow-lg">
                     <div class="text-yellow-400 flex mb-4">★★★★★</div>
-                    <p class="text-gray-600 italic mb-4">"Poder ver mis tareas pendientes y recibir feedback de mi profesor al instante me ayuda muchísimo a mejorar."</p>
+                    <p class="text-gray-600 italic mb-4">"Poder ver mis tareas pendientes y dar feedback a mi profesor al instante nos ayuda a mejorar a los dos."</p>
                     <div class="flex items-center">
                         <div class="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center text-green-600 font-bold">C</div>
                         <div class="ml-3">
@@ -122,7 +122,7 @@
 
                 <div class="bg-white p-6 rounded-lg shadow-lg">
                     <div class="text-yellow-400 flex mb-4">★★★★☆</div>
-                    <p class="text-gray-600 italic mb-4">"La interfaz es muy limpia y fácil de usar. Gestionar mis horarios nunca había sido tan sencillo."</p>
+                    <p class="text-gray-600 italic mb-4">"La interfaz es muy limpia y fácil de usar. Gestionar mis grupos de clases nunca había sido tan sencillo."</p>
                     <div class="flex items-center">
                         <div class="h-10 w-10 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 font-bold">S</div>
                         <div class="ml-3">
